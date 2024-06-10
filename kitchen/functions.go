@@ -1,25 +1,26 @@
 package main
 
 import (
+	"cocina/persistence"
 	"encoding/json"
 	"log"
 	"net/http"
+	"math/rand"
 	"time"
 )
 
 func requestIngredients(ingredients map[string]int, orderID int) {
-	url := "http://store:8081/ingredients"
-	ingredientRequest := map[string]interface{}{
-		"ingredients": ingredients,
-		"orderID":     orderID,
+	ingredientRequest := IngredientsRequest{
+		Ingredients: ingredients,
+		OrderID:     orderID,
 	}
-	resp, err := http.Post(url, "application/json", jsonRequest(ingredientRequest))
+	resp, err := http.Post(storeIngredientsUrl, "application/json", jsonRequest(ingredientRequest))
 	if err != nil {
+		// mejorar el manejo de errores, por ejemplo volver a intentar la solicitud o responder con error al usuario
 		log.Println("Error requesting ingredients:", err)
 		return
 	}
 	defer resp.Body.Close()
-
 	var result map[string]string
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		log.Println("Error decoding response:", err)
@@ -27,17 +28,39 @@ func requestIngredients(ingredients map[string]int, orderID int) {
 	}
 
 	if result["status"] == "ingredients available" {
-		updateOrderStatus(orderID, "cocinando")
+		db.UpdateOrderStatus(orderID, cookingStatus)
 		time.Sleep(5 * time.Second) 
-		updateOrderStatus(orderID, "entregado")
+		db.UpdateOrderStatus(orderID, deliveredStatus)
 	}
 }
 
-func updateOrderStatus(orderID int, status string) {
-	for i, order := range orders {
-		if order.ID == orderID {
-			orders[i].Status = status
-			break
-		}
+func createOrder() (persistence.Order, error) {
+	recipe, err := getRandomRecipe()
+	if err != nil {
+		return persistence.Order{}, err
 	}
+	order, err := db.CreateOrder(recipe.Name, receivedStatus)
+	if err != nil {
+		return persistence.Order{}, err
+	}
+	go requestIngredients(recipe.Ingredients, order.ID)
+	return order, nil
+}
+
+func getRandomRecipe() (persistence.Recipe, error) {
+	recipeID := rand.Intn(6) + 1
+	recipe,  err := db.GetRecipe(recipeID)
+	if err != nil {
+		log.Println("Error getting recipe:", err)
+		return persistence.Recipe{}, err
+	}
+	return recipe, nil
+}
+
+func getOrders() ([]persistence.Order, error) {
+	return db.GetOrders()
+}
+
+func getRecipes() ([]persistence.Recipe, error) {
+	return db.GetRecipes()
 }

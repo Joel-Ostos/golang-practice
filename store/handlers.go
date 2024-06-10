@@ -11,10 +11,14 @@ func requestIngredients(w http.ResponseWriter, r *http.Request) {
 		OrderID     int            `json:"orderID"`
 	}
 	_ = json.NewDecoder(r.Body).Decode(&requestData)
+	// toda esta logica debe ir en funciones a parte, los handlers deben ser lo mas simples posibles y manejar unicamente la logica de http
 
 	allIngredientsAvailable := true
 
+	// comprar ingredientes con concurrencia, las peticiones http toman tiempo y hacerlas de manera lineal puede ser ineficiente
 	for ingredient, quantity := range requestData.Ingredients {
+		// wg.add(1)
+		// buyIngredient(ingredient, wg)
 		if stock[ingredient] < quantity {
 			allIngredientsAvailable = false
 			quantityBought := buyIngredient(ingredient)
@@ -26,7 +30,7 @@ func requestIngredients(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-
+	// wg.wait()
 	if allIngredientsAvailable {
 		for ingredient, quantity := range requestData.Ingredients {
 			stock[ingredient] -= quantity
