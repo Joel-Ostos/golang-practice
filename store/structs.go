@@ -2,6 +2,11 @@ package main
 
 type Stock map[string]int
 
+type askIngredients struct {
+  Ingredients map[string]int `json:"ingredients"`
+  OrderID     int            `json:"orderID"`
+}
+
 type Purchase struct {
 	Ingredient   string
 	QuantitySold int

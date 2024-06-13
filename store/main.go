@@ -10,7 +10,7 @@ import (
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/ingredients", requestIngredients).Methods("POST")
+	router.HandleFunc("/ingredients", requestIngredientsHandler).Methods("POST")
 	router.HandleFunc("/stock", getStock).Methods("GET")
 	router.HandleFunc("/purchases", getPurchases).Methods("GET")
 

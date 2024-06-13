@@ -5,40 +5,26 @@ import (
 	"net/http"
 )
 
-func requestIngredients(w http.ResponseWriter, r *http.Request) {
-	var requestData struct {
-		Ingredients map[string]int `json:"ingredients"`
-		OrderID     int            `json:"orderID"`
-	}
-	_ = json.NewDecoder(r.Body).Decode(&requestData)
-	// toda esta logica debe ir en funciones a parte, los handlers deben ser lo mas simples posibles y manejar unicamente la logica de http
+func requestIngredientsHandler(w http.ResponseWriter, r *http.Request) {
+	http.Header.Add(w.Header(), "content-type", "application/json")
+	var requestData askIngredients
+	json.NewDecoder(r.Body).Decode(&requestData)
 
-	allIngredientsAvailable := true
+	ingredientsAvailable, err := requestIngredients(&requestData)
 
-	// comprar ingredientes con concurrencia, las peticiones http toman tiempo y hacerlas de manera lineal puede ser ineficiente
-	for ingredient, quantity := range requestData.Ingredients {
-		// wg.add(1)
-		// buyIngredient(ingredient, wg)
-		if stock[ingredient] < quantity {
-			allIngredientsAvailable = false
-			quantityBought := buyIngredient(ingredient)
-			stock[ingredient] += quantityBought
-			purchases = append(purchases, Purchase{Ingredient: ingredient, QuantitySold: quantityBought})
-		}
-		if stock[ingredient] < quantity {
-			allIngredientsAvailable = false
-			break
-		}
+	if (err != nil) {
+	  http.Error(w, "Error buying ingredients", http.StatusInternalServerError)
+	  return
 	}
-	// wg.wait()
-	if allIngredientsAvailable {
+
+	if ingredientsAvailable {
 		for ingredient, quantity := range requestData.Ingredients {
 			stock[ingredient] -= quantity
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ingredients available"})
-	} else {
-		json.NewEncoder(w).Encode(map[string]string{"status": "waiting for ingredients"})
-	}
+		return;
+	} 
+	json.NewEncoder(w).Encode(map[string]string{"status": "waiting for ingredients"})
 }
 
 func getStock(w http.ResponseWriter, r *http.Request) {
