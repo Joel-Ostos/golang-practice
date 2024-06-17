@@ -1,5 +1,7 @@
 package persistence
 
+import "database/sql"
+
 type Persistence interface {
 	CreateOrder(recipeName, status string) (Order, error)
 	GetOrders() ([]Order, error)
@@ -8,6 +10,4 @@ type Persistence interface {
 	GetRecipe(recipeID int) (Recipe, error)
 }
 
-var orders []Order
-
-var recipes []Recipe
+var db *sql.DB

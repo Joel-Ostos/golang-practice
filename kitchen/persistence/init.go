@@ -1,14 +1,50 @@
 package persistence
 
-import ()
+import (
+	"database/sql"
+	"log"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+)
 
 func init() {
-	recipes = []Recipe{
-		{1, "Ensalada de Pollo", map[string]int{"lettuce": 1, "chicken": 1, "tomato": 1, "lemon": 1}},
-		{2, "Arroz con Pollo", map[string]int{"rice": 1, "chicken": 1, "onion": 1, "tomato": 1}},
-		{3, "Papas Fritas con Ketchup", map[string]int{"potato": 2, "ketchup": 1}},
-		{4, "Hamburguesa", map[string]int{"meat": 1, "cheese": 1, "lettuce": 1, "tomato": 1}},
-		{5, "Sopa de Cebolla", map[string]int{"onion": 3, "cheese": 1}},
-		{6, "Pollo a la Parrilla con Ensalada", map[string]int{"chicken": 1, "lettuce": 1, "tomato": 1, "lemon": 1}},
-	}
+  var err error
+  db, err = sql.Open("sqlite3", "persistence/data")
+  if err != nil {
+    log.Fatal(err.Error())
+    return
+  }
+  if err := db.Ping(); err != nil {
+    fmt.Println("Error al hacer ping a la base de datos:", err)
+    return
+  }
+  // Consulta para obtener los nombres de todas las tablas
+  rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
+  if err != nil {
+    fmt.Println("Error al ejecutar la consulta:", err)
+    return
+  }
+  defer rows.Close()
+
+  // Variable para almacenar los nombres de las tablas
+  var tableName string
+
+  // Iterar sobre los resultados
+  for rows.Next() {
+    // Escanear el nombre de la tabla desde la fila actual
+    if err := rows.Scan(&tableName); err != nil {
+      fmt.Println("Error al escanear fila:", err)
+      return
+    }
+    // Imprimir el nombre de la tabla
+    fmt.Println("Tabla encontrada:", tableName)
+  }
+
+  // Manejar errores después del iterador
+  if err := rows.Err(); err != nil {
+    fmt.Println("Error final después de iterar filas:", err)
+    return
+  }
+
+  fmt.Println("Consulta de tablas exitosa.")
 }
