@@ -1,11 +1,14 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
+	"store/persistence"
 )
+
+var db persistence.Persistence
+var xd persistence.Persistence
 
 func main() {
 	router := mux.NewRouter()
@@ -13,7 +16,12 @@ func main() {
 	router.HandleFunc("/ingredients", requestIngredientsHandler).Methods("POST")
 	router.HandleFunc("/stock", getStock).Methods("GET")
 	router.HandleFunc("/purchases", getPurchases).Methods("GET")
-
+	db = persistence.NewPersistenceInMemory()
+	db.getIngredientQuantity("tomato")
+	xd = persistence.NewPersistenceInMemory()
 	log.Println("Bodega service running on port 8081")
-	http.ListenAndServe(":8081", router)
+	err := http.ListenAndServe(":8081", router)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

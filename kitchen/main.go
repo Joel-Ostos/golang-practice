@@ -2,9 +2,9 @@ package main
 
 import (
 	"cocina/persistence"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"github.com/gorilla/mux"
 )
 
 var db persistence.Persistence
@@ -18,5 +18,3 @@ func main() {
 	log.Println("Cocina service running on port 8080")
 	http.ListenAndServe(":8080", router)
 }
-
-
