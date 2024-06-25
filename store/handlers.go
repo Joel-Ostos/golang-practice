@@ -20,7 +20,11 @@ func requestIngredientsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if ingredientsAvailable {
 		for ingredient, quantity := range requestData.Ingredients {
-			stock[ingredient] -= quantity
+			err := db.SetIngredientSold(ingredient, quantity)
+			if err != nil {
+				log.Fatal(err.Error())
+				return
+			}
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ingredients available"})
 		return

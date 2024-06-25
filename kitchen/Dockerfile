@@ -9,11 +9,10 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-COPY persistence/data /app/persistence/data
+#COPY persistence/data /app/persistence/data
 
-COPY . .
+COPY . /app
 
 RUN go build -o main .
 
 CMD ["./main"]
-

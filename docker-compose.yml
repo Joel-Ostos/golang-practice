@@ -1,4 +1,3 @@
-version: '3'
 services:
   kitchen:
     build:
@@ -7,10 +6,13 @@ services:
       - "8080:8080"
     depends_on:
       - store
+    volumes:
+      - ./database/data:/app/data.db
 
   store:
     build:
       context: ./store
     ports:
       - "8081:8081"
-
+    volumes:
+      - ./database/data:/app/data.db

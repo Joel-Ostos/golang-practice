@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cocina/persistence"
+	"kitchen/persistence"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -16,7 +16,6 @@ func requestIngredients(ingredients map[string]int, orderID int) {
 	}
 	resp, err := http.Post(storeIngredientsUrl, "application/json", jsonRequest(ingredientRequest))
 	if err != nil {
-		// mejorar el manejo de errores, por ejemplo volver a intentar la solicitud o responder con error al usuario
 		log.Println("Error requesting ingredients:", err)
 		return
 	}
@@ -36,24 +35,31 @@ func requestIngredients(ingredients map[string]int, orderID int) {
 
 func createOrder() (persistence.Order, error) {
 	recipe, err := getRandomRecipe()
+
 	if err != nil {
 		return persistence.Order{}, err
 	}
+
 	order, err := db.CreateOrder(recipe.Name, receivedStatus)
+
 	if err != nil {
 		return persistence.Order{}, err
 	}
+
 	go requestIngredients(recipe.Ingredients, order.ID)
+
 	return order, nil
 }
 
 func getRandomRecipe() (persistence.Recipe, error) {
 	recipeID := rand.Intn(6) + 1
 	recipe,  err := db.GetRecipe(recipeID)
+
 	if err != nil {
 		log.Println("Error getting recipe:", err)
 		return persistence.Recipe{}, err
 	}
+
 	return recipe, nil
 }
 

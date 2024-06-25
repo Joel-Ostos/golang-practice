@@ -1,4 +1,4 @@
-module cocina
+module kitchen
 
 go 1.18
 

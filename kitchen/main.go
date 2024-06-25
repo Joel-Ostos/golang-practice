@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cocina/persistence"
+	"kitchen/persistence"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -15,6 +15,6 @@ func main() {
 	router.HandleFunc("/recipes", getRecipesHandler).Methods("GET")
 	router.HandleFunc("/orders", getOrdersHandler).Methods("GET")
 	db = persistence.NewPersistenceInMemory()
-	log.Println("Cocina service running on port 8080")
+	log.Println("Kitchen service running on port 8080")
 	http.ListenAndServe(":8080", router)
 }

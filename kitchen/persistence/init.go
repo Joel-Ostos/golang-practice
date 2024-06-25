@@ -10,6 +10,7 @@ import (
 func init() {
   var err error
   db, err = sql.Open("sqlite3", "../database/data")
+  
   if err != nil {
     log.Fatal(err.Error())
     return

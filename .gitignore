@@ -1,2 +1,7 @@
 persistence/*
 .idea/
+database/data-journal
+kitchen/cocina
+kitchen/kitchen
+store/store
+database/data_backup*
